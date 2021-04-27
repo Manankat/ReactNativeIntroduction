@@ -1,60 +1,10 @@
 import React from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, AppRegistry } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Button, ThemeProvider } from 'react-native-elements';
+import { HomeScreen, UsersScreen, UserScreen, RepositoriesScreen, RepositoryScreen } from './screens'
 
 const Stack = createStackNavigator();
-
-const HomeScreen = ({ navigation }) => {
-    return (
-        <>
-            <Button
-                title="Repositories"
-                style={styles.button}
-                onPress={() =>
-                    navigation.navigate('Repositories')
-                }
-            />
-            <Button
-                title="Users"
-                style={styles.button}
-                onPress={() =>
-                    navigation.navigate('Users')
-                }
-            />
-        </>
-    )
-};
-
-const UsersScreen = ({ navigation, route }) => {
-    return (
-        <Text>
-        </Text>
-    )
-};
-
-const UserScreen = ({ navigation, route }) => {
-    return (
-        <Text>
-        </Text>
-    )
-};
-
-const RepositoriesScreen = ({ navigation, route }) => {
-    return (
-        <Text>
-        </Text>
-    )
-};
-
-const RepositoryScreen = ({ navigation, route }) => {
-    return (
-        <Text>
-        </Text>
-    )
-};
 
 
 const App = () => (
@@ -65,7 +15,6 @@ const App = () => (
                 component={HomeScreen}
                 options={{ title: 'Welcome' }}
             />
-
             <Stack.Screen
                 name="Users"
                 component={UsersScreen}
@@ -92,25 +41,5 @@ const App = () => (
 
 );
 
-const styles = StyleSheet.create({
-    header:
-    {
-        height: '8%',
-        alignItems: 'center',
-        backgroundColor: 'black',
-        justifyContent: 'space-between',
-    },
-    itemStyle: {
-        padding: 10,
-    },
-    subTitle: {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 40
-    },
-    button: {
-        padding: 10
-    }
-});
 
 export default App;
