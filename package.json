@@ -10,6 +10,7 @@
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/native": "^5.9.4",
+    "@react-navigation/stack": "^5.14.4",
     "expo": "^41.0.1",
     "expo-cli": "^4.4.3",
     "expo-status-bar": "~1.0.4",
@@ -22,7 +23,8 @@
     "react-native-router-flux": "^4.3.1",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "~3.0.0",
-    "react-native-web": "~0.13.12"
+    "react-native-web": "~0.13.12",
+    "react-router-native": "^5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
