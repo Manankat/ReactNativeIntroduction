@@ -39,8 +39,7 @@ export default class getRepositoriesbyUsername extends Component {
     return (
       <ScrollView>
               <View>
-                <Text>{JSON.stringify(this.state.repos.full_name)}</Text>
-                <Text>{JSON.stringify(this.state.repos.full_name)}</Text>
+                <Text>{JSON.stringify(this.state.repos.full_name), JSON.stringify(this.state.repos.html_url)}</Text>
               </View>
       </ScrollView>
     )
