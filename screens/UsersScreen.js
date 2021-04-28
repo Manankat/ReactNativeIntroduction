@@ -3,10 +3,28 @@ import {StyleSheet, View, Button, TextInput, Text, Image } from 'react-native';
 import { ScrollView, TouchableHighlight } from 'react-native-gesture-handler';
 
 export const UsersScreen = ({ navigation, route }) => {
-    const [search, setText, searchResults] = useState('');
+    const [search, setText] = useState('');
+    const [searchResults, setResults] = useState('');
 
     const openUserView = (e) => {
         navigation.navigate('User', { userInfo : searchResults[e]})
+    }
+
+    const userSubmit = () => {
+        var A = search.toLowerCase().trim();
+        fetch(`https://api.github.com/search/users?q=${A}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.message) {
+                    setError(data.message)
+              } else {
+                  console.log(data.items)
+                  setResults(data.items);
+              }
+          })
+          .catch((error) => {
+              console.log(error)
+          })
     }
 
     return (
@@ -14,10 +32,10 @@ export const UsersScreen = ({ navigation, route }) => {
           <View style={styles.container}>
               <View style={styles.header}>
                   <View style={{flex:4}}>
-                      <TextInput style={styles.textInput} placeholder="Type Here..."/>
+                      <TextInput style={styles.textInput} onChangeText={search => setText(search)} placeholder="Type Here..."/>
                   </View>
                   <View style={{flex:1, margin: 13}}>
-                      <Button style={styles.button} title="Search" color="green" onChangeText={search => setText(search)}/>          
+                      <Button style={styles.button} title="Search" color="green" onPress={userSubmit}/>          
                   </View>
               </View>
               <ScrollView style={styles.scroll}>
@@ -27,9 +45,9 @@ export const UsersScreen = ({ navigation, route }) => {
                           <View style={styles.itemView}>
                               <Image
                                   style={styles.avatar}
-                                  source="https://s1.qwant.com/thumbr/0x380/b/4/7c24c765849af68c22bd08489618a7e455dd988e748e735ec03b6284a9e523/img_410627.png?u=http%3A%2F%2Fcdn.onlinewebfonts.com%2Fsvg%2Fimg_410627.png&q=0&b=1&p=0&a=0"
+                                  source={element.avatar_url}
                               />
-                              <Text style={styles.name}>{element.name}</Text>
+                              <Text style={styles.name}>{element.login}</Text>
                           </View>
                           </TouchableHighlight>)
                       }) : "")
@@ -46,9 +64,10 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: "row",
       backgroundColor: '#ecf0f1',
-      position: "absolute",
+      position: "sticky",
       width: "100%",
-      top: 0
+      top: 0,
+      zIndex: 10
     },
     textInput:{
       alignItems: 'center',
@@ -67,7 +86,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     scroll: {
-      top: 70,
     },
     item : {
       width: "100%",
