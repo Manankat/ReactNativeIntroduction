@@ -4,47 +4,9 @@ import { ScrollView, TouchableHighlight } from 'react-native-gesture-handler';
 
 export const UsersScreen = ({ navigation, route }) => {
     const [search, setText, searchResults] = useState('');
-    const items = [
-        {
-            name: "oui"
-        },
-        {
-            name: "non"
-        },
-        {
-            name: "o"
-        },
-        {
-            name: "i"
-        },
-        {
-            name: "u"
-        },
-        {
-            name: "n"
-        },
-        {
-            name: "oui"
-        },
-        {
-            name: "non"
-        },
-        {
-            name: "o"
-        },
-        {
-            name: "i"
-        },
-        {
-            name: "u"
-        },
-        {
-            name: "n"
-        }
-    ]
-      
+
     const openUserView = (e) => {
-        navigation.navigate('User', { userInfo : items[e]})
+        navigation.navigate('User', { userInfo : searchResults[e]})
     }
 
     return (
@@ -60,7 +22,7 @@ export const UsersScreen = ({ navigation, route }) => {
               </View>
               <ScrollView style={styles.scroll}>
                   {
-                      (items ? items.map((element, index) => {
+                      (searchResults ? searchResults.map((element, index) => {
                           return (<TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
                           <View style={styles.itemView}>
                               <Image
