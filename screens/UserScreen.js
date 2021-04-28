@@ -26,11 +26,11 @@ export const UserScreen = ({ navigation, route }) => {
 
     const userResearch = (e) => {
         setUInput(e);
-        console.log(e)
     }
 
     const userSubmit = () => {
-        fetch(`https://api.github.com/users/${uInput}`)
+      var A = uInput.toLowerCase().trim();
+      fetch(`https://api.github.com/users/${A}`)
           .then(res => res.json())
           .then(data => {
             if (data.message) {
