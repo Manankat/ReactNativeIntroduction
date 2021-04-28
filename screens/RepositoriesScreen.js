@@ -1,34 +1,34 @@
-import React from "react";
+import React,{useState, useEffect} from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, AppRegistry } from "react-native";
+import { StyleSheet, Text, TextInput, View, AppRegistry, ScrollView } from "react-native";
 import { Button, ThemeProvider } from 'react-native-elements';
 
 export const RepositoriesScreen = ({ navigation, route }) => {
-    const [username, setName] = useState('');
-    const [login, setLogin] = useState('');
+    const [repositories, setRepositories] = useState('');
     const [error, setError] = useState('');
     const [uInput, setUInput] = useState('');
 
     const setData = ({
-        username
+        repositories
     }) => {
-      setName(username);
+        setRepositories(repositories);
     }
 
-    const userResearch = (e) => {
+    const repositoriesResearch = (e) => {
         setUInput(e);
         console.log(e)
     }
 
-    const userSubmit = () => {
-        username = username.toLowerCase().trim();
-        fetch(`https://api.github.com/users/${username}/repos`)
+    const repositoriesSubmit = () => {
+        var a = uInput.toLowerCase().trim();
+        fetch(`https://api.github.com/search/repositories?q=${a}`)
           .then(res => res.json())
           .then(data => {
             if (data.message) {
                   setError(data.message)
             } else {
-                  setData(data);
+                console.log(data)
+                  setRepositories(data.items);
                   setError(null);
             }
         })
@@ -40,9 +40,9 @@ export const RepositoriesScreen = ({ navigation, route }) => {
         <>
         <TextInput
             style={styles.userInput}
-            placeholder='Users'
+            placeholder='Search repositories'
             onChangeText={(uInput) =>
-                userResearch(uInput)
+                repositoriesResearch(uInput)
             }
             defaultValue={uInput}
         />
@@ -50,10 +50,21 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             title='Search Users'
             style={styles.button}
             onPress={() =>
-                userSubmit()
+                repositoriesSubmit()
             }
         />
-        <Text>{username} {login}</Text>
+        <ScrollView>
+            {
+
+                (repositories ? repositories.map((repo, i)=>{
+                return(
+                    <View>
+                        <Text>{(repo.full_name)}</Text>
+                    </View>
+                )
+            }) : "")
+            }
+        </ScrollView>
     </>
     )
 };
