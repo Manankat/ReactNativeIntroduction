@@ -12,24 +12,24 @@ import {
 
 export default class getRepositoriesbyUsername extends Component {
   state = {
-    repository: '',
+    username: '',
     repos: [],
   }
 
   handleChange = (evt) => {
     this.setState({
-      repository: evt.nativeEvent.text
+      username: evt.nativeEvent.text
     });
   }
 
-  getRepository = (repository) => {
-    repository = repository.toLowerCase().trim();
-    const url = `https://api.github.com/repos/${repository}`;
+  getUserRepos = (username) => {
+    username = username.toLowerCase().trim();
+    const url = `https://api.github.com/users/${username}/repos`;
     return fetch(url).then((res) => res.json());
   }
 
   handleSubmit = () => {
-    this.getRepository(this.state.repository)
+    this.getUserRepos(this.state.username)
       .then((res) => {
         this.setState({repos: res});
       });
@@ -38,9 +38,15 @@ export default class getRepositoriesbyUsername extends Component {
   renderRepos = () => {
     return (
       <ScrollView>
-              <View>
-                <Text>{JSON.stringify(this.state.repos.full_name)}</Text>
+        {
+          this.state.repos.map((repo, i) => {
+            return (
+              <View key={i}>
+                <Text>{i}, {JSON.stringify(repo.full_name)}</Text>
               </View>
+            )
+          })
+        }
       </ScrollView>
     )
   }
@@ -50,7 +56,7 @@ export default class getRepositoriesbyUsername extends Component {
       <View style={styles.container}>
         <Text style={styles.label}>GitHub Username</Text>
         <TextInput
-          placeholder="Enter your github username/repository"
+          placeholder="Enter your github username"
           style={styles.input}
           onChange={this.handleChange}
         />
