@@ -53,7 +53,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             }
         />
         <ScrollView>
-            {(repositories?repositories.map((repo, i)=>{
+            {(repositories&&repositories.map((repo, i)=>{
                     return(
                         <View key={i} style={styles.block_repo}>
                             <View style={styles.block_content}><Text>{repo.full_name}</Text></View>
@@ -64,7 +64,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
                             <View style={styles.block_content}><Text>{repo.default_branch}</Text></View>
                         </View>
                     )
-                }):"")
+                }))
             }
         </ScrollView>
     </>
