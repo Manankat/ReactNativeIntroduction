@@ -12,7 +12,7 @@ const App = () => (
         <Stack.Navigator>
             <Stack.Screen
                 name="Home"
-                component={HomeScreen}
+                component={UsersScreen}
                 options={{ title: 'Welcome' }}
             />
             <Stack.Screen
