@@ -1,7 +1,7 @@
 import React,{useState, useEffect} from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, TextInput, View, AppRegistry, ScrollView } from "react-native";
-import { Button, ThemeProvider } from 'react-native-elements';
+import { StyleSheet, Text, TextInput, View, ScrollView } from "react-native";
+import { Button } from 'react-native-elements';
 
 export const RepositoriesScreen = ({ navigation, route }) => {
     const [repositories, setRepositories] = useState('');
@@ -16,7 +16,6 @@ export const RepositoriesScreen = ({ navigation, route }) => {
 
     const repositoriesResearch = (e) => {
         setUInput(e);
-        console.log(e)
     }
 
     const repositoriesSubmit = () => {
@@ -25,7 +24,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
           .then(res => res.json())
           .then(data => {
             if (data.message) {
-                  setError(data.message)
+                  setError(data.message);
             } else {
                 console.log(data)
                   setRepositories(data.items);
@@ -54,39 +53,86 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             }
         />
         <ScrollView>
-            {
-
-                (repositories ? repositories.map((repo, i)=>{
-                return(
-                    <View>
-                        <Text>{(repo.full_name)}</Text>
-                    </View>
-                )
-            }) : "")
+            {(repositories?repositories.map((repo, i)=>{
+                    return(
+                        <View key={i} style={styles.block_repo}>
+                            <View style={styles.block_content}><Text>{repo.full_name}</Text></View>
+                            <View style={styles.block_content}><Text>{repo.private}</Text></View>
+                            <View style={styles.block_content}><Text>{repo.description}</Text></View>
+                            <View style={styles.block_content}><Text>{repo.forks}</Text></View>
+                            <View style={styles.block_content}><Text>{repo.size}</Text></View>
+                            <View style={styles.block_content}><Text>{repo.default_branch}</Text></View>
+                        </View>
+                    )
+                }):"")
             }
         </ScrollView>
     </>
     )
 };
 
-
 const styles = StyleSheet.create({
-    header:
-    {
-        height: '8%',
-        alignItems: 'center',
-        backgroundColor: 'black',
-        justifyContent: 'space-between',
+    block_repo: {
+        borderRadius: 20,
+        fontSize:14,
+        margin:10,
+        flexDirection:'row',
+        flex:1,
+        justifyContent:'space-between',
+        alignItems:'center',
+        backgroundColor:'#FAFAD2',
     },
-    itemStyle: {
-        padding: 10,
+    block_content: {
+        padding:5,
+        borderWidth: 2,
+        borderRadius:10,
+        margin:10,
+        backgroundColor:'white',
     },
-    subTitle: {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 40
+    header: {
+      flex: 1,
+      flexDirection: "row",
+      backgroundColor: '#ecf0f1',
+      position: "absolute",
+      width: "100%",
+      top: 0,
+      zIndex: 10
+    },
+    textInput:{
+      alignItems: 'center',
+      backgroundColor: '#b3b3b3',
+      borderRadius: 10,
+      color: 'black',
+      justifyContent: "flex-start",
+      fontSize: 17,
+      height: 43,
+      margin: 8,
+      marginVertical: 10,
+      paddingHorizontal: 10
     },
     button: {
-        padding: 10
+        marginTop:20,
+      justifyContent: "flex-end",
+      alignItems: 'center',
+    },
+    scroll: {
+    },
+    item : {
+      width: "100%",
+      marginBottom: 5,
+      backgroundColor: "#d6d6d6",
+      flexDirection: "row",
+      height: 50,
+    },
+    itemView: {
+      flexDirection: "row"
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        flex: 1
+    },
+    name: {
+        alignContent: "center",
     }
 });
