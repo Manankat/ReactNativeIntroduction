@@ -5,9 +5,9 @@ import { ScrollView, TouchableHighlight } from 'react-native-gesture-handler';
 export const UsersScreen = ({ navigation, route }) => {
     const [search, setText] = useState('');
     const [searchResults, setResults] = useState('');
-
-    const openUserView = (e) => {
-        navigation.navigate('User', { userInfo : searchResults[e]})
+    
+    const openUserView = (index) => {
+        navigation.navigate('User', { userInfo : searchResults[index] })
     }
 
     const userSubmit = () => {
@@ -18,7 +18,6 @@ export const UsersScreen = ({ navigation, route }) => {
               if (data.message) {
                     setError(data.message)
               } else {
-                  console.log(data.items)
                   setResults(data.items);
               }
           })
@@ -38,7 +37,7 @@ export const UsersScreen = ({ navigation, route }) => {
                       <Button style={styles.button} title="Search" color="green" onPress={userSubmit}/>          
                   </View>
               </View>
-              <ScrollView style={styles.scroll}>
+              <ScrollView>
                   {
                       (searchResults ? searchResults.map((element, index) => {
                           return (<TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
@@ -84,8 +83,6 @@ const styles = StyleSheet.create({
     button: {
       justifyContent: "flex-end",
       alignItems: 'center',
-    },
-    scroll: {
     },
     item : {
       width: "100%",
