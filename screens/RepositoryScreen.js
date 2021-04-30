@@ -1,52 +1,81 @@
 import React,{useState, useEffect} from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, AppRegistry, ScrollView} from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableHighlight} from "react-native";
 
 export const RepositoryScreen = ({ navigation, route }) => {
     const [repositories, setRepositories] = useState('');
+    const [issues, setIssues] = useState('');
     const [updated, setUpdated] = useState('');
+    const [contributors, setContributors] = useState('');
     const [repository, setRepository] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (!updated) {
+            fetchContributors(route.params.repoInfo.contributors_url)
             setUpdated(true);
         }
     })
 
-    const contributors = route.params.userInfo.contributors_url;
-    const issues = route.params.userInfo.issues_url;
-    const full_name = route.params.userInfo.full_name;
-    console.log(route.params)
-    console.log(route.params.userInfo)
-    console.log(contributors)
-    console.log(issues)
+    const fetchIssues = (link) => {
+        fetch(link)
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    setError(data.message)
+                } else {
+                    setRepositories(data)
+                }
+          })
+          .catch((error) => {
+              console.log(error)
+          })
+    }
+
+    const fetchContributors = (link) => {
+        fetch(link)
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    setError(data.message)
+                } else {
+                    setContributors(data)
+                }
+          })
+          .catch((error) => {
+              console.log(error)
+          })
+    }
 
     const openUserView = (index) => {
-        navigation.navigate('User', { repoInfo : repositories[index] })
+        navigation.navigate('User', { userInfo : contributors[index] })
     }
 
     return (
         <>
             <View style={styles.container}>
-                {
-                repositories.length > 0 && (
-                    <FlatList
-                    data={repositories}
-                    onEndReachedThreshold={0.8}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ element, index }) => (
-                        <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
-                            <View key={index} style={styles.itemView}>
-                                <View style={styles.item}><Text>{full_name}</Text></View>
-                                <View style={styles.item}><Text>{issues}</Text></View>
-                                <View style={styles.item}><Text>{contributors}</Text></View>
-                            </View>
-                        </TouchableHighlight>
+                    <View style={styles.itemView}>
+                        <Text style={styles.repo}>Repository Name</Text>
+                        <Text style={styles.repo}>{route.params.repoInfo.full_name}</Text>
+                        <Text style={styles.repo}>The Contributors</Text>
+                        {
+                            contributors.length > 0 && (
+                                <FlatList
+                                    data={contributors}
+                                    onEndReachedThreshold={0.8}
+                                    keyExtractor={(index) => index.toString()}
+                                    renderItem={({ item, index }) => (
+                                        <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
+                                            <View key={index} style={styles.block_repo}>
+                                                <View style={styles.block_content}><Text>{item.login}</Text></View>
+                                            </View>
+                                        </TouchableHighlight>
 
-                    )}
-                />
-                )
-                }
+                                    )}
+                                />
+                            )
+                        }
+                    </View>
             </View>
         </>
     )
@@ -84,7 +113,7 @@ const styles = StyleSheet.create({
         fontSize: 15
     },
     repo: {
-        marginTop: 30,
+        margin: 30,
         alignContent: "center",
         fontSize: 20
     },

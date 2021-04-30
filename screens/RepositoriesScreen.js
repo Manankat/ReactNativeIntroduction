@@ -15,7 +15,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
     }
 
     function openRepoView(index) {
-        navigation.navigate('Repository', { userInfo: repositories[index] })
+        navigation.navigate('Repository', { repoInfo: repositories[index] })
     }
 
     const repositoriesResearch = (e) => {
