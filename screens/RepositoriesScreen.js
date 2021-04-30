@@ -14,6 +14,10 @@ export const RepositoriesScreen = ({ navigation, route }) => {
         setRepositories(repositories);
     }
 
+    function openRepoView(index) {
+        navigation.navigate('Repository', { userInfo: searchResults[index] })
+    }
+
     const repositoriesResearch = (e) => {
         setUInput(e);
     }
@@ -58,7 +62,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
                     onEndReachedThreshold={0.8}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item, index }) => (
-                        <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
+                        <TouchableHighlight style={styles.item} key={index} onPress={() => openRepoView(index)}>
                             <View key={index} style={styles.block_repo}>
                                 <View style={styles.block_content}><Text>{item.full_name}</Text></View>
                                 <View style={styles.block_content}><Text>{item.private}</Text></View>
