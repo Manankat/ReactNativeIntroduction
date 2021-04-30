@@ -1,6 +1,6 @@
 import React,{useState, useEffect} from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, TextInput, View, ScrollView } from "react-native";
+import { StyleSheet, Text, TextInput, View, ScrollView, FlatList, TouchableHighlight} from "react-native";
 import { Button } from 'react-native-elements';
 
 export const RepositoriesScreen = ({ navigation, route }) => {
@@ -26,7 +26,6 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             if (data.message) {
                   setError(data.message);
             } else {
-                console.log(data)
                   setRepositories(data.items);
                   setError(null);
             }
@@ -51,22 +50,29 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             onPress={() =>
                 repositoriesSubmit()
             }
-        />
-        <ScrollView>
-            {(repositories&&repositories.map((repo, i)=>{
-                    return(
-                        <View key={i} style={styles.block_repo}>
-                            <View style={styles.block_content}><Text>{repo.full_name}</Text></View>
-                            <View style={styles.block_content}><Text>{repo.private}</Text></View>
-                            <View style={styles.block_content}><Text>{repo.description}</Text></View>
-                            <View style={styles.block_content}><Text>{repo.forks}</Text></View>
-                            <View style={styles.block_content}><Text>{repo.size}</Text></View>
-                            <View style={styles.block_content}><Text>{repo.default_branch}</Text></View>
-                        </View>
-                    )
-                }))
-            }
-        </ScrollView>
+            />
+        {
+            repositories.length > 0 && (
+                <FlatList
+                    data={repositories}
+                    onEndReachedThreshold={0.8}
+                    keyExtractor={(index) => index.toString()}
+                    renderItem={({ item, index }) => (
+                        <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
+                            <View key={index} style={styles.block_repo}>
+                                <View style={styles.block_content}><Text>{item.full_name}</Text></View>
+                                <View style={styles.block_content}><Text>{item.private}</Text></View>
+                                <View style={styles.block_content}><Text>{item.description}</Text></View>
+                                <View style={styles.block_content}><Text>{item.forks}</Text></View>
+                                <View style={styles.block_content}><Text>{item.size}</Text></View>
+                                <View style={styles.block_content}><Text>{item.default_branch}</Text></View>
+                            </View>
+                        </TouchableHighlight>
+
+                    )}
+                />
+            )
+        }
     </>
     )
 };
