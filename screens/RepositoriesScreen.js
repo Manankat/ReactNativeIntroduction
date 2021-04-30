@@ -14,6 +14,14 @@ export const RepositoriesScreen = ({ navigation, route }) => {
         setRepositories(repositories);
     }
 
+    useEffect(() => {
+        if (!updated) {
+            repositoriesSubmit(route.params.userInfo.repos_url);
+            setUser(route.params.userInfo);
+            setUpdated(true);
+        }
+    })
+
     function openRepoView(index) {
         navigation.navigate('Repository', { userInfo: searchResults[index] })
     }
