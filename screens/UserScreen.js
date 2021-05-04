@@ -1,96 +1,144 @@
 import React, { useState, useEffect } from 'react';
-import 'react-native-gesture-handler';
-import { Text, StyleSheet, TextInput, Button ,ScrollView} from 'react-native';
+import {StyleSheet, View, Text, Image, TouchableHighlight } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export const UserScreen = ({ navigation, route }) => {
-    const [name, setName] = useState('');
-    const [login, setLogin] = useState('');
-    const [error, setError] = useState('');
-    const [uInput, setUInput] = useState('');
+    const [repositories, setRepositories] = useState('');
+    const [followers, setFollowers] = useState('');
+    const [updated, setUpdated] = useState('');
+    const [user, setUser] = useState('');
 
-    // useEffect(() => {
-    //     fetch("https://api.github.com/users/example")
-    //       .then(res => res.json())
-    //       .then(data => {
-    //         setData(data);
-    //       });
-    // }, []);
+    useEffect(() => {
+        if (!updated) {
+            fetchRepositories(route.params.userInfo.repos_url);
+            fetchFollowers(route.params.userInfo.followers_url);
+            setUser(route.params.userInfo);
+            setUpdated(true);
+        }
+    })
 
-    const setData = ({
-        name,
-        login
-    }) => {
-      setName(name);
-      setLogin(login);
+    const fetchRepositories = (link) => {
+        fetch(link)
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    setError(data.message)
+                } else {
+                    setRepositories(data)
+                }
+          })
+          .catch((error) => {
+              console.log(error)
+          })
     }
 
-    const userResearch = (e) => {
-        setUInput(e);
+    const fetchFollowers = (link) => {
+        fetch(link)
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    setError(data.message)
+                } else {
+                    setFollowers(data)
+                }
+          })
+          .catch((error) => {
+              console.log(error)
+          })
     }
 
-    const userSubmit = () => {
-      var A = uInput.toLowerCase().trim();
-      fetch(`https://api.github.com/users/${A}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.message) {
-                  setError(data.message)
-            } else {
-                  setData(data);
-                  setError(null);
-            }
-        })
-        .catch((error) => {
-            console.log(error)
-        })
+    const openRepoView = (index) => {
+        navigation.navigate('Repository', { repoInfo : repositories[index] })
     }
 
-    // const displayUsers = () => {
-    //     return (
-    //       <ScrollView>
-    //               <View>
-    //                 <Text>{name}</Text>
-    //                 <Text>{login}</Text>
-    //               </View>
-    //       </ScrollView>
-    //     )
-    // }
+    const openUserView = (index) => {
+        fetchRepositories(followers[index].repos_url)
+        fetchFollowers(followers[index].followers_url)
+        setUser(followers[index]);
+        window.scrollTo(0,0);
+    }
 
     return (
-      <>
-          <TextInput
-              style={styles.userInput}
-              placeholder='Users'
-              onChangeText={(uInput) =>
-                  userResearch(uInput)
-              }
-              defaultValue={uInput}
-          />
-          <Button
-              title='Search Users'
-              style={styles.button}
-              onPress={() =>
-                  userSubmit()
-              }
-          />
-          <Text>{name} {login}</Text>
-      </>
-    // { error ? (<h1>{error}<h1/>) : { displayUsers() } }
+        <>
+            <View style={styles.container}>
+                <ScrollView>
+                    <View style={styles.itemView}>
+                        <Image
+                            style={styles.avatar}
+                            source={user.avatar_url}
+                        />
+                        <Text style={styles.name}>{user.login}</Text>
+                        <Text style={styles.type}>{user.type}</Text>
+                        <Text style={styles.repo}>Repositories</Text>
+                        {
+                            (repositories
+                            ? repositories.map((element, index) => {
+                                return(
+                                    <TouchableHighlight style={styles.item} key={index} onPress={() => openRepoView(index)}>
+                                        <View style={styles.itemView}>
+                                            <Text style={styles.repoName}>{element.name}</Text>
+                                        </View>
+                                    </TouchableHighlight>
+                                )
+                            }): "")
+                        }
+                        <Text style={styles.repo}>Followers</Text>
+                        {
+                            (followers
+                            ? followers.map((element, index) => {
+                                return (
+                                    <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
+                                        <View style={styles.itemView}>
+                                            <Text style={styles.repoName}>{element.login}</Text>
+                                        </View>
+                                    </TouchableHighlight>)
+                            }): "")
+                        }
+                    </View>
+                </ScrollView>
+            </View>
+        </>
     )
 };
 
 const styles = StyleSheet.create({
-    userInput: {
-        padding: 10,
-        alignItems: 'center',
-        textAlign: 'center',
-        // justifyContent: 'space-between',
+    container: {
+        justifyContent: "center",
+        alignItems: "center"
     },
-    button: {
-        padding: 10,
-        backgroundColor: 'blue',
-        alignItems: 'center',
-        textAlign: 'center',
-        // justifyContent: 'space-between'
+    item : {
+        width: "100%",
+        marginBottom: 5,
+        backgroundColor: "#d6d6d6",
+        flexDirection: "row",
+        height: 50,
+    },
+    itemView: {
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    avatar: {
+        width: 200,
+        height: 200,
+        flex: 1
+    },
+    name: {
+        marginTop: 20,
+        alignContent: "center",
+        fontSize: 30
+    },
+    type: {
+        marginTop: 10,
+        alignContent: "center",
+        fontSize: 15
+    },
+    repo: {
+        marginTop: 30,
+        alignContent: "center",
+        fontSize: 20
+    },
+    repoName: {
+        fontSize: 15,
     }
-})
+});
+  
