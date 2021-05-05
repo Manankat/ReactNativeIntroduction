@@ -1,106 +1,233 @@
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, View, Button, TextInput, Text, Image } from 'react-native';
-import { ScrollView, TouchableHighlight } from 'react-native-gesture-handler';
+import {
+    StyleSheet,
+    View,
+    Button,
+    TextInput,
+    Text,
+    Image,
+    FlatList,
+    ActivityIndicator,
+    Alert,
+    SafeAreaView
+} from 'react-native';
+import { TouchableHighlight } from 'react-native-gesture-handler';
+import MainHeader from "../components/MainHeader";
+import { BackgroundColor } from "../constants";
+import { uniqBy } from "lodash";
+
+
+function User({ item, index }) {
+    return (
+        <View style={userStyles.article}>
+            <Image
+                style={userStyles.articleImage}
+                source={{ uri: item.avatar_url }}
+            />
+
+            <View style={{ flex: 1 }}>
+                <TouchableHighlight style={{
+                    paddingHorizontal: 20,
+                    paddingVertical: 10,
+                    backgroundColor: "#d6d6d6",
+                    borderBottomColor: '#f2f2f2',
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }} key={index} onPress={() => openUserView(index)}>
+                    <Text>
+                        {item.login}
+                    </Text>
+                </TouchableHighlight>
+            </View>
+        </View>
+    )
+}
+
+/*
+
+            <Text>
+                {item.score}
+            </Text>
+
+            */
+const userStyles = StyleSheet.create({
+    article: {
+        flexDirection: "row",
+        paddingVertical: 15,
+    },
+    articleImage: {
+        width: 150,
+        height: 85,
+        resizeMode: "contain",
+        marginRight: 15,
+    },
+    articleTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    articleDescription: {
+        fontSize: 16,
+        marginBottom: 10,
+    },
+    articlePublishedAt: {
+        fontSize: 14,
+    },
+});
+
 
 export const UsersScreen = ({ navigation, route }) => {
-    const [search, setText] = useState('');
-    const [searchResults, setResults] = useState('');
-    
+    const [searchResults, setResults] = useState([]);
+    const [search, setText] = useState('a');
+    const [isLoading, setLoading] = useState(true);
+    const hasMoreData = useState(false)
+    const [page, setPage] = useState(1);
+
+
+
     const openUserView = (index) => {
-        navigation.navigate('User', { userInfo : searchResults[index] })
+        navigation.navigate('User', { userInfo: searchResults[index] })
     }
 
-    const userSubmit = () => {
+    useEffect(() => {
+        userSubmit()
+    }, [])
+
+    async function userSubmit() {
+        if (!hasMoreData) return;
         var A = search.toLowerCase().trim();
-        fetch(`https://api.github.com/search/users?q=${A}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.message) {
-                    setError(data.message)
-              } else {
-                  setResults(data.items);
-              }
-          })
-          .catch((error) => {
-              console.log(error)
-          })
+
+        try {
+            const response = await fetch(`https://api.github.com/search/users?q=${A}`);
+            const newResults = await response.json();
+
+            setResults((searchResults) => {
+                // Combine and filter article has no image
+                const allResults = searchResults.concat(
+                    newResults.items.filter((result) => result.avatar_url)
+                );
+
+                // Remove duplicate articles
+                // https://lodash.com/docs/4.17.15#uniqBy
+                return uniqBy(allResults, "url");
+            });
+
+            setPage(page + 1)
+            setLoading(false);
+        } catch (error) {
+            Alert.alert("Cannot connect to Server!");
+        }
     }
+
+    function renderItem({ item, index }) {
+        return (
+            <User item={item} index={index} />
+        );
+    };
+
+    const renderDivider = () => <View style={{
+        borderBottomWidth: 1,
+        borderBottomColor: "#ed7669",
+    }}></View>;
+    const renderFooter = () => (
+        <View style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+        }}>
+            {hasMoreData && <ActivityIndicator color="blue" />}
+        </View>
+    );
+    const keyExtractor = (item) => item.avatar_url;
+
 
     return (
-      <>
-          <View style={styles.container}>
-              <View style={styles.header}>
-                  <View style={{flex:4}}>
-                      <TextInput style={styles.textInput} onChangeText={search => setText(search)} placeholder="Type Here..."/>
-                  </View>
-                  <View style={{flex:1, margin: 13}}>
-                      <Button style={styles.button} title="Search" color="green" onPress={userSubmit}/>          
-                  </View>
-              </View>
-              <ScrollView>
-                  {
-                      (searchResults ? searchResults.map((element, index) => {
-                          return (<TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
-                          <View style={styles.itemView}>
-                              <Image
-                                  style={styles.avatar}
-                                  source={element.avatar_url}
-                              />
-                              <Text style={styles.name}>{element.login}</Text>
-                          </View>
-                          </TouchableHighlight>)
-                      }) : "")
-                  }
-              </ScrollView>
-            </View>
-      </>
-    );
-  };
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.headlines}>Worldwide News</Text>
+                {
+                    /*
+                    <MainHeader
+                        title="Users"
+                        isMain={true}
+                        navigation={navigation}
+                    />
+                <View style={{ margin: 10 }}>
+                    <View>
+                        <TextInput style={oldStyles.textInput} onChangeText={search => setText(search)} placeholder="Type Here..." />
+                    </View>
+                    <View style={{ marginHorizontal: 100 }}>
+                        <Button style={oldStyles.button} title="Search" color={BackgroundColor} onPress={userSubmit} />
+                    </View>
+                </View>
+                        */
+                }
 
-  
-const styles = StyleSheet.create({
-    header: {
-      flex: 1,
-      flexDirection: "row",
-      backgroundColor: '#ecf0f1',
-      position: "sticky",
-      width: "100%",
-      top: 0,
-      zIndex: 10
-    },
-    textInput:{
-      alignItems: 'center',
-      backgroundColor: '#b3b3b3',
-      borderRadius: 10,
-      color: 'black',
-      justifyContent: "flex-start",
-      fontSize: 17,
-      height: 43,
-      margin: 8,
-      marginVertical: 10,
-      paddingHorizontal: 10
+                {!isLoading ? (
+                    <FlatList
+                        data={searchResults}
+                        renderItem={renderItem}
+                        keyExtractor={keyExtractor}
+                        initialNumToRender={30}
+                        onEndReached={console.log(page)}
+                        ItemSeparatorComponent={renderDivider}
+                        ListFooterComponent={renderFooter}
+                        onEndReachedThreshold={0.5}
+                        showsVerticalScrollIndicator={false}
+                        onRefresh={console.log("refresh")}
+                    />
+                ) : (
+                    <ActivityIndicator animating size="large" style={{ marginTop: 20 }} />
+                )}
+            </View>
+        </SafeAreaView>
+    );
+};
+
+
+const oldStyles = StyleSheet.create({
+    textInput: {
+        alignItems: 'center',
+        backgroundColor: '#b3b3b3',
+        borderRadius: 10,
+        color: 'black',
+        justifyContent: "flex-start",
+        fontSize: 17,
+        height: 43,
+        margin: 8,
+        marginVertical: 10,
+        paddingHorizontal: 10
     },
     button: {
-      justifyContent: "flex-end",
-      alignItems: 'center',
+        justifyContent: "flex-end",
+        alignItems: 'center',
     },
-    item : {
-      width: "100%",
-      marginBottom: 5,
-      backgroundColor: "#d6d6d6",
-      flexDirection: "row",
-      height: 50,
-    },
-    itemView: {
-      flexDirection: "row"
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        flex: 1
-    },
-    name: {
-        alignContent: "center",
-    }
 });
-  
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingTop: 20,
+    },
+    content: {
+        flex: 1,
+        padding: 15,
+    },
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    headlines: {
+        fontSize: 32,
+        fontWeight: "bold",
+        lineHeight: 50,
+        color: "red",
+    },
+    articleSeparator: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#ed7669",
+    },
+});
