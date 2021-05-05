@@ -1,21 +1,17 @@
-import React,{useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, FlatList, TouchableHighlight} from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableHighlight } from "react-native";
 
 export const RepositoryScreen = ({ navigation, route }) => {
     const [repositories, setRepositories] = useState('');
     const [issues, setIssues] = useState('');
-    const [updated, setUpdated] = useState('');
     const [contributors, setContributors] = useState('');
     const [repository, setRepository] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!updated) {
-            fetchContributors(route.params.repoInfo.contributors_url)
-            setUpdated(true);
-        }
-    })
+        fetchContributors(route.params.repoInfo.contributors_url)
+    }, [])
 
     const fetchIssues = (link) => {
         fetch(link)
@@ -26,10 +22,10 @@ export const RepositoryScreen = ({ navigation, route }) => {
                 } else {
                     setRepositories(data)
                 }
-          })
-          .catch((error) => {
-              console.log(error)
-          })
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const fetchContributors = (link) => {
@@ -41,41 +37,41 @@ export const RepositoryScreen = ({ navigation, route }) => {
                 } else {
                     setContributors(data)
                 }
-          })
-          .catch((error) => {
-              console.log(error)
-          })
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const openUserView = (index) => {
-        navigation.navigate('User', { userInfo : contributors[index] })
+        navigation.navigate('User', { userInfo: contributors[index] })
     }
 
     return (
         <>
             <View style={styles.container}>
-                    <View style={styles.itemView}>
-                        <Text style={styles.repo}>Repository Name</Text>
-                        <Text style={styles.repo}>{route.params.repoInfo.full_name}</Text>
-                        <Text style={styles.repo}>The Contributors</Text>
-                        {
-                            contributors.length > 0 && (
-                                <FlatList
-                                    data={contributors}
-                                    onEndReachedThreshold={0.8}
-                                    keyExtractor={(index) => index.toString()}
-                                    renderItem={({ item, index }) => (
-                                        <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
-                                            <View key={index} style={styles.block_repo}>
-                                                <View style={styles.block_content}><Text>{item.login}</Text></View>
-                                            </View>
-                                        </TouchableHighlight>
+                <View style={styles.itemView}>
+                    <Text style={styles.repo}>Repository Name</Text>
+                    <Text style={styles.repo}>{route.params.repoInfo.full_name}</Text>
+                    <Text style={styles.repo}>The Contributors</Text>
+                    {
+                        contributors.length > 0 && (
+                            <FlatList
+                                data={contributors}
+                                onEndReachedThreshold={0.8}
+                                keyExtractor={(index) => index.toString()}
+                                renderItem={({ item, index }) => (
+                                    <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
+                                        <View key={index} style={styles.block_repo}>
+                                            <View style={styles.block_content}><Text>{item.login}</Text></View>
+                                        </View>
+                                    </TouchableHighlight>
 
-                                    )}
-                                />
-                            )
-                        }
-                    </View>
+                                )}
+                            />
+                        )
+                    }
+                </View>
             </View>
         </>
     )
@@ -86,7 +82,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-    item : {
+    item: {
         width: "100%",
         marginBottom: 5,
         backgroundColor: "#d6d6d6",

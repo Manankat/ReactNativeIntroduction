@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, View, Text, Image, TouchableHighlight } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableHighlight } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 export const UserScreen = ({ navigation, route }) => {
-    const [repositories, setRepositories] = useState('');
-    const [followers, setFollowers] = useState('');
-    const [updated, setUpdated] = useState('');
-    const [user, setUser] = useState('');
+    const [repositories, setRepositories] = useState([]);
+    const [followers, setFollowers] = useState([]);
+    const [user, setUser] = useState({});
 
     useEffect(() => {
-        if (!updated) {
-            fetchRepositories(route.params.userInfo.repos_url);
-            fetchFollowers(route.params.userInfo.followers_url);
-            setUser(route.params.userInfo);
-            setUpdated(true);
-        }
-    })
+        fetchRepositories(route.params.userInfo.repos_url);
+        fetchFollowers(route.params.userInfo.followers_url);
+        setUser(route.params.userInfo);
+    }, [])
 
     const fetchRepositories = (link) => {
         fetch(link)
@@ -26,10 +22,10 @@ export const UserScreen = ({ navigation, route }) => {
                 } else {
                     setRepositories(data)
                 }
-          })
-          .catch((error) => {
-              console.log(error)
-          })
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const fetchFollowers = (link) => {
@@ -41,21 +37,21 @@ export const UserScreen = ({ navigation, route }) => {
                 } else {
                     setFollowers(data)
                 }
-          })
-          .catch((error) => {
-              console.log(error)
-          })
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const openRepoView = (index) => {
-        navigation.navigate('Repository', { repoInfo : repositories[index] })
+        navigation.navigate('Repository', { repoInfo: repositories[index] })
     }
 
     const openUserView = (index) => {
         fetchRepositories(followers[index].repos_url)
         fetchFollowers(followers[index].followers_url)
         setUser(followers[index]);
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
     }
 
     return (
@@ -67,32 +63,38 @@ export const UserScreen = ({ navigation, route }) => {
                             style={styles.avatar}
                             source={user.avatar_url}
                         />
-                        <Text style={styles.name}>{user.login}</Text>
-                        <Text style={styles.type}>{user.type}</Text>
-                        <Text style={styles.repo}>Repositories</Text>
+                        <Text style={styles.name}>
+                            {user.login}
+                        </Text>
+                        <Text style={styles.type}>
+                            {user.type}
+                        </Text>
+                        <Text style={styles.repo}>
+                            Repositories
+                        </Text>
                         {
-                            (repositories
-                            ? repositories.map((element, index) => {
-                                return(
+                            repositories.map((element, index) => {
+                                return (
                                     <TouchableHighlight style={styles.item} key={index} onPress={() => openRepoView(index)}>
                                         <View style={styles.itemView}>
                                             <Text style={styles.repoName}>{element.name}</Text>
                                         </View>
                                     </TouchableHighlight>
                                 )
-                            }): "")
+                            })
                         }
-                        <Text style={styles.repo}>Followers</Text>
+                        <Text style={styles.repo}>
+                            Followers
+                        </Text>
                         {
-                            (followers
-                            ? followers.map((element, index) => {
+                            followers.map((element, index) => {
                                 return (
                                     <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
                                         <View style={styles.itemView}>
                                             <Text style={styles.repoName}>{element.login}</Text>
                                         </View>
                                     </TouchableHighlight>)
-                            }): "")
+                            })
                         }
                     </View>
                 </ScrollView>
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-    item : {
+    item: {
         width: "100%",
         marginBottom: 5,
         backgroundColor: "#d6d6d6",
@@ -141,4 +143,3 @@ const styles = StyleSheet.create({
         fontSize: 15,
     }
 });
-  
