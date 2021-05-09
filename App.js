@@ -4,13 +4,13 @@ import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { UsersScreen, UserScreen, RepositoriesScreen, RepositoryScreen } from './screens'
-import { AntDesign } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { UsersScreen, UserScreen, RepositoriesScreen, RepositoryScreen, FavoritesScreen } from './screens'
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
 // https://reactnavigation.org/docs/stack-navigator/
 const UserStack = createStackNavigator();
 const RepositoryStack = createStackNavigator();
+const FavoritesStack = createStackNavigator();
 const stackScreenOptions = {
     headerShown: false,
     gestureEnabled: true,
@@ -34,6 +34,15 @@ function RepositoryStackScreen() {
     );
 }
 
+function FavoritesStackScreen() {
+    return (
+        <FavoritesStack.Navigator screenOptions={stackScreenOptions}>
+            <FavoritesStack.Screen name="Favorites" component={FavoritesScreen} />
+            <FavoritesStack.Screen name="Repository" component={RepositoryScreen} />
+        </FavoritesStack.Navigator>
+    );
+}
+
 const Tab = createBottomTabNavigator();
 const ActiveColor = "#000000";
 const InActiveColor = "#00000077";
@@ -42,10 +51,13 @@ const tabScreenOptions = ({ route }) => ({
         return (
             <View style={{ alignItems: "center" }}>
                 {
-                    route.name === "Users" ?
-                        <AntDesign name="team" size={size} color={color} />
-                        :
-                        <MaterialCommunityIcons name="source-repository" size={size} color={color} />
+                    route.name === "Users" && <AntDesign name="team" size={size} color={color} />
+                }
+                {
+                    route.name === "Repositories" && <MaterialCommunityIcons name="source-repository" size={size} color={color} />
+                }
+                {
+                    route.name === "Favorites" && <AntDesign name="staro" size={size} color={color} />
                 }
             </View>
         );
@@ -65,6 +77,7 @@ function App() {
             >
                 <Tab.Screen name="Users" component={UserStackScreen} />
                 <Tab.Screen name="Repositories" component={RepositoryStackScreen} />
+                <Tab.Screen name="Favorites" component={FavoritesStackScreen} />
             </Tab.Navigator>
         </NavigationContainer>
     )

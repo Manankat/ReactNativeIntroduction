@@ -7,14 +7,14 @@ import {
     TouchableOpacity,
 } from "react-native";
 
-export default function Repository({ item, navigation }) {
+export default function User({ item, navigation }) {
 
-    function openRepositoryView() {
-        navigation.push('Repository', { userInfo: item })
+    function openUserView() {
+        navigation.push('User', { userInfo: item })
     }
 
     return (
-        <TouchableOpacity onPress={() => openRepositoryView()}>
+        <TouchableOpacity onPress={() => openUserView()}>
             <View style={styles.user}>
                 <Image source={{ uri: item.avatar_url }} style={styles.userImage} />
 

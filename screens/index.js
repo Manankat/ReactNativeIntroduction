@@ -1,4 +1,4 @@
-export * from './HomeScreen'
+export * from './FavoritesScreen'
 export * from './RepositoriesScreen'
 export * from './RepositoryScreen'
 export * from './UsersScreen'

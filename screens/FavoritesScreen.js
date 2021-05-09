@@ -5,46 +5,44 @@ import {
     View,
     FlatList,
     ActivityIndicator,
-    Button,
-    TextInput,
 } from "react-native";
 import Constants from "expo-constants";
 import { uniqBy } from "lodash";
-import { getUsers } from "./apis";
-import User from "./User";
+import Repository from "./Repository";
 import MainHeader from "../components/MainHeader";
-import { BackgroundColor } from "../constants";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const PAGE_SIZE = 10;
 const PRIMARY_COLOR = "#e74c3c";
 
-export function UsersScreen({ navigation }) {
+export const FavoritesScreen = ({ navigation, route }) => {
     const [query, setQuery] = useState('');
     const [isLoading, setLoading] = useState(true);
-    const [users, setUsers] = useState([]);
+    const [repositories, setRepositories] = useState([]);
     const [page, setPage] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
     const hasMoreData = useRef(true);
 
-    function userSubmit() {
-        setPage(1)
-        fetchData()
-    }
 
-    async function fetchData () {
-        if (!hasMoreData.current && users.length > 0) return;
-
-        const newUsers = await getUsers(query, page, PAGE_SIZE);
-        if (newUsers.length < PAGE_SIZE) {
-            hasMoreData.current = false;
+    async function getFavorites() {
+        try {
+            const jsonValue = await AsyncStorage.getItem('favorites')
+            return jsonValue != null ? JSON.parse(jsonValue) : [];
+        } catch (e) {
+            // error reading value
         }
+    }
+    async function fetchData() {
+        if (!hasMoreData.current && repositories.length > 0) return;
 
-        setUsers((users) => {
-            const allUsers = users.concat(
-                newUsers.filter((user) => user.avatar_url)
+        const newRepositories = await getFavorites()
+        console.log(newRepositories)
+
+        setRepositories((repositories) => {
+            const allRepositories = repositories.concat(
+                newRepositories.filter((repository) => repository.url)
             );
 
-            return uniqBy(allUsers, "url");
+            return uniqBy(allRepositories, "url");
         });
         setLoading(false);
         setRefreshing(false);
@@ -52,17 +50,17 @@ export function UsersScreen({ navigation }) {
 
     useEffect(() => {
         fetchData();
-    }, [page]);
+    }, []);
 
     const refreshData = () => {
-        setPage(1);
         setRefreshing(true);
-        setUsers([]);
+        setRepositories([]);
         hasMoreData.current = true;
+        fetchData()
     };
 
-    const renderUser = ({ item }) => <User item={item} navigation={navigation} />;
-    const renderDivider = () => <View style={styles.userSeparator}></View>;
+    const renderRepository = ({ item }) => <Repository item={item} navigation={navigation} />;
+    const renderDivider = () => <View style={styles.repositorySeparator}></View>;
     const renderFooter = () => (
         <View style={styles.center}>
             {hasMoreData.current && <ActivityIndicator color={PRIMARY_COLOR} />}
@@ -74,36 +72,22 @@ export function UsersScreen({ navigation }) {
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
                 <MainHeader
-                    title="Users"
+                    title="Favorites"
                     isMain={true}
                     navigation={navigation}
                 />
-                <View style={{ margin: 10 }}>
-                    <View>
-                        <TextInput style={oldStyles.textInput} onChangeText={search => setQuery(search)} placeholder="Type Here..." />
-                    </View>
-                    <View style={{ marginHorizontal: 100 }}>
-                        <Button style={oldStyles.button} title="Search" color={BackgroundColor} onPress={userSubmit} />
-                    </View>
-                </View>
                 {isLoading ? (
                     <View style={styles.center}>
                         <ActivityIndicator size="large" color={PRIMARY_COLOR} />
                     </View>
                 ) : (
                     <FlatList
-                        data={users}
-                        renderItem={renderUser}
+                        data={repositories}
+                        renderItem={renderRepository}
                         keyExtractor={keyExtractor}
                         showsVerticalScrollIndicator={false}
                         ItemSeparatorComponent={renderDivider}
                         ListFooterComponent={renderFooter}
-                        initialNumToRender={6}
-                        onEndReached={() => {
-                            setPage((page) => page + 1);
-                        }
-                        }
-                        onEndReachedThreshold={1}
                         onRefresh={refreshData}
                         refreshing={refreshing}
                     />
@@ -133,7 +117,7 @@ const styles = StyleSheet.create({
         lineHeight: 50,
         color: PRIMARY_COLOR,
     },
-    userSeparator: {
+    repositorySeparator: {
         borderBottomWidth: 1,
         borderBottomColor: "#ed7669",
     },
