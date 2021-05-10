@@ -4,13 +4,14 @@ import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { UsersScreen, UserScreen, RepositoriesScreen, RepositoryScreen, FavoritesScreen } from './screens'
+import { UsersScreen, UserScreen, RepositoriesScreen, RepositoryScreen, FavoritesScreen, IssueScreen } from './screens'
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
 // https://reactnavigation.org/docs/stack-navigator/
 const UserStack = createStackNavigator();
 const RepositoryStack = createStackNavigator();
 const FavoritesStack = createStackNavigator();
+const IssueStack = createStackNavigator();
 const stackScreenOptions = {
     headerShown: false,
     gestureEnabled: true,
@@ -40,6 +41,14 @@ function FavoritesStackScreen() {
             <FavoritesStack.Screen name="Favorites" component={FavoritesScreen} />
             <FavoritesStack.Screen name="Repository" component={RepositoryScreen} />
         </FavoritesStack.Navigator>
+    );
+}
+
+function IssueStackScreen() {
+    return (
+        <IssueStack.Navigator screenOptions={stackScreenOptions}>
+            <IssueStack.Screen name="Issue" component={IssueScreen} />
+        </IssueStack.Navigator>
     );
 }
 
