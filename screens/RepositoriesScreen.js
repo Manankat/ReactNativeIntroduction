@@ -49,7 +49,7 @@ export const RepositoriesScreen = ({ navigation, route }) => {
             defaultValue={uInput}
         />
         <Button
-            title='Search Users'
+            title='SEARCH'
             style={styles.button}
             onPress={() =>
                 repositoriesSubmit()

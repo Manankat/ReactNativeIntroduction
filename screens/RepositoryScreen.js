@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import 'react-native-gesture-handler';
 import { StyleSheet, Text, View, FlatList, TouchableHighlight } from "react-native";
+import Issue from "./Issue";
 
 export const RepositoryScreen = ({ navigation, route }) => {
-    const [repositories, setRepositories] = useState('');
-    const [issues, setIssues] = useState('');
+    const [repositories, setRepositories] = useState([]);
+    const [issues, setIssues] = useState([]);
     const [contributors, setContributors] = useState('');
-    const [repository, setRepository] = useState('');
+    // const [repository, setRepository] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
         fetchContributors(route.params.repoInfo.contributors_url)
     }, [])
+
+    useEffect(() => {
+        fetchIssues(route.params.issueInfo);
+    }, [route.params.issueInfo])
 
     const fetchIssues = (link) => {
         fetch(link)
@@ -20,7 +25,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
                 if (data.message) {
                     setError(data.message)
                 } else {
-                    setRepositories(data)
+                    setIssues(data)
                 }
             })
             .catch((error) => {
@@ -47,13 +52,18 @@ export const RepositoryScreen = ({ navigation, route }) => {
         navigation.navigate('User', { userInfo: contributors[index] })
     }
 
+    const openIssueView = (index) => {
+        navigation.navigate('Issue', { issueInfo: issues[index] })
+    }
+
     return (
         <>
             <View style={styles.container}>
                 <View style={styles.itemView}>
-                    <Text style={styles.repo}>Repository Name</Text>
+
+                    <Text style={styles.repo}>Issue Number</Text>
                     <Text style={styles.repo}>{route.params.repoInfo.full_name}</Text>
-                    <Text style={styles.repo}>The Contributors</Text>
+                    <Text style={styles.repo}>All issues</Text>
                     {
                         contributors.length > 0 && (
                             <FlatList
@@ -66,8 +76,23 @@ export const RepositoryScreen = ({ navigation, route }) => {
                                             <View style={styles.block_content}><Text>{item.login}</Text></View>
                                         </View>
                                     </TouchableHighlight>
-
                                 )}
+                            />
+                        )
+                    }
+                    {
+                        issues.length > 0 && (
+                            <FlatList
+                                data={issues}
+                                onEndReachedThreshold={0.8}
+                                keyExtractor={(index) => index.toString()}
+                                renderItem={({ item, index }) => {
+                                  <TouchableHighlight style={styles.item} key={index}>
+                                      <View key={index} style={styles.block_repo}>
+                                          <View style={styles.block_content}><Text>{item.number}</Text></View>
+                                      </View>
+                                  </TouchableHighlight>
+                                }}
                             />
                         )
                     }
