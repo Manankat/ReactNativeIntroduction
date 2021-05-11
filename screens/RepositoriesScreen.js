@@ -1,148 +1,156 @@
-import React,{useState, useEffect} from "react";
-import 'react-native-gesture-handler';
-import { StyleSheet, Text, TextInput, View, ScrollView, FlatList, TouchableHighlight} from "react-native";
-import { Button } from 'react-native-elements';
+import React, { useState, useEffect, useRef } from "react";
+import {
+    StyleSheet,
+    SafeAreaView,
+    View,
+    FlatList,
+    ActivityIndicator,
+    Button,
+    TextInput,
+} from "react-native";
+import Constants from "expo-constants";
+import { uniqBy } from "lodash";
+import { searchGithub } from "./apis";
+import { MainHeader, Repository } from "../components";
+import { BackgroundColor } from "../constants";
 
-export const RepositoriesScreen = ({ navigation, route }) => {
-    const [repositories, setRepositories] = useState('');
-    const [error, setError] = useState('');
-    const [uInput, setUInput] = useState('');
+const PAGE_SIZE = 10;
+const PRIMARY_COLOR = "#e74c3c";
 
-    const setData = ({
-        repositories
-    }) => {
-        setRepositories(repositories);
+export function RepositoriesScreen({ navigation }) {
+    const [query, setQuery] = useState('');
+    const [isLoading, setLoading] = useState(true);
+    const [repositories, setRepositories] = useState([]);
+    const [page, setPage] = useState(1);
+    const [refreshing, setRefreshing] = useState(false);
+    const hasMoreData = useRef(true);
+
+    function repositorySubmit() {
+        setPage(1)
+        setRepositories([])
+        fetchData()
     }
 
-    function openRepoView(index) {
-        navigation.navigate('Repository', { repoInfo: repositories[index] })
-    }
+    async function fetchData() {
+        if (hasMoreData.current && repositories.length > 0) return;
 
-    const repositoriesResearch = (e) => {
-        setUInput(e);
-    }
-
-    const repositoriesSubmit = () => {
-        var a = uInput.toLowerCase().trim();
-        fetch(`https://api.github.com/search/repositories?q=${a}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.message) {
-                  setError(data.message);
-            } else {
-                  setRepositories(data.items);
-                  setError(null);
-            }
-        })
-        .catch((error) => {
-            console.log(error)
-        })
-    }
-    return (
-        <>
-        <TextInput
-            style={styles.userInput}
-            placeholder='Search repositories'
-            onChangeText={(uInput) =>
-                repositoriesResearch(uInput)
-            }
-            defaultValue={uInput}
-        />
-        <Button
-            title='SEARCH'
-            style={styles.button}
-            onPress={() =>
-                repositoriesSubmit()
-            }
-            />
-        {
-            repositories.length > 0 && (
-                <FlatList
-                    data={repositories}
-                    onEndReachedThreshold={0.8}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ item, index }) => (
-                        <TouchableHighlight style={styles.item} key={index} onPress={() => openRepoView(index)}>
-                            <View key={index} style={styles.block_repo}>
-                                <View style={styles.block_content}><Text>{item.full_name}</Text></View>
-                                <View style={styles.block_content}><Text>{item.private}</Text></View>
-                                <View style={styles.block_content}><Text>{item.description}</Text></View>
-                                <View style={styles.block_content}><Text>{item.forks}</Text></View>
-                                <View style={styles.block_content}><Text>{item.size}</Text></View>
-                                <View style={styles.block_content}><Text>{item.default_branch}</Text></View>
-                            </View>
-                        </TouchableHighlight>
-
-                    )}
-                />
-            )
+        const newRepositories = await searchGithub('repositories', query, page, PAGE_SIZE);
+        if (newRepositories.length < PAGE_SIZE) {
+            hasMoreData.current = false;
         }
-    </>
-    )
-};
+
+        setRepositories((repositories) => {
+            const allRepositories = repositories.concat(
+                newRepositories.filter((repository) => repository.id)
+            );
+
+            return uniqBy(allRepositories, "url");
+        });
+        setLoading(false);
+        setRefreshing(false);
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [page]);
+
+    const refreshData = () => {
+        setPage(1);
+        setRefreshing(true);
+        setRepositories([]);
+        hasMoreData.current = true;
+    };
+
+    const renderRepository = ({ item }) => <Repository item={item} navigation={navigation} />;
+    const renderDivider = () => <View style={styles.repositorySeparator}></View>;
+    const renderFooter = () => (
+        <View style={styles.center}>
+            {hasMoreData.current && <ActivityIndicator color={PRIMARY_COLOR} />}
+        </View>
+    );
+    const keyExtractor = (item) => item.url;
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                <MainHeader
+                    title="Repositories"
+                    isMain={true}
+                    navigation={navigation}
+                />
+                <View style={{ margin: 10 }}>
+                    <View>
+                        <TextInput style={styles.textInput} onChangeText={search => setQuery(search)} placeholder="Type Here..." />
+                    </View>
+                    <View style={{ marginHorizontal: 100 }}>
+                        <Button style={styles.button} title="Search" color={BackgroundColor} onPress={repositorySubmit} />
+                    </View>
+                </View>
+                {isLoading ? (
+                    <View style={styles.center}>
+                        <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={repositories}
+                        renderItem={renderRepository}
+                        keyExtractor={keyExtractor}
+                        showsVerticalScrollIndicator={false}
+                        ItemSeparatorComponent={renderDivider}
+                        ListFooterComponent={renderFooter}
+                        initialNumToRender={6}
+                        onEndReached={() => {
+                            setPage((page) => page + 1);
+                        }
+                        }
+                        onEndReachedThreshold={1}
+                        onRefresh={refreshData}
+                        refreshing={refreshing}
+                    />
+                )}
+            </View>
+        </SafeAreaView>
+    );
+}
 
 const styles = StyleSheet.create({
-    block_repo: {
-        borderRadius: 20,
-        fontSize:14,
-        margin:10,
-        flexDirection:'row',
-        flex:1,
-        justifyContent:'space-between',
-        alignItems:'center',
-        backgroundColor:'#FAFAD2',
+    container: {
+        flex: 1,
+        paddingTop: Constants.statusBarHeight,
     },
-    block_content: {
-        padding:5,
-        borderWidth: 2,
-        borderRadius:10,
-        margin:10,
-        backgroundColor:'white',
+    content: {
+        flex: 1,
+        paddingVertical: 15,
     },
-    header: {
-      flex: 1,
-      flexDirection: "row",
-      backgroundColor: '#ecf0f1',
-      position: "absolute",
-      width: "100%",
-      top: 0,
-      zIndex: 10
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
-    textInput:{
-      alignItems: 'center',
-      backgroundColor: '#b3b3b3',
-      borderRadius: 10,
-      color: 'black',
-      justifyContent: "flex-start",
-      fontSize: 17,
-      height: 43,
-      margin: 8,
-      marginVertical: 10,
-      paddingHorizontal: 10
+    headlines: {
+        fontSize: 32,
+        fontWeight: "bold",
+        lineHeight: 50,
+        color: PRIMARY_COLOR,
+    },
+    repositorySeparator: {
+        borderBottomWidth: 1,
+        borderBottomColor: BackgroundColor,
+    },
+    textInput: {
+        alignItems: 'center',
+        backgroundColor: '#b3b3b3',
+        borderRadius: 10,
+        color: 'black',
+        justifyContent: "flex-start",
+        fontSize: 17,
+        height: 43,
+        margin: 8,
+        marginVertical: 10,
+        paddingHorizontal: 10
     },
     button: {
-        marginTop:20,
-      justifyContent: "flex-end",
-      alignItems: 'center',
+        justifyContent: "flex-end",
+        alignItems: 'center',
     },
-    scroll: {
-    },
-    item : {
-      width: "100%",
-      marginBottom: 5,
-      backgroundColor: "#d6d6d6",
-      flexDirection: "row",
-      height: 50,
-    },
-    itemView: {
-      flexDirection: "row"
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        flex: 1
-    },
-    name: {
-        alignContent: "center",
-    }
 });

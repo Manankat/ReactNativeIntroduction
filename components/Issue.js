@@ -2,8 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text, Image, TouchableOpacity,
 } from "react-native";
 
-export default function Issue({ item, navigation }) {
-
+export function Issue({ item, navigation }) {
   function openIssueView() {
       navigation.push('Issue', { issueInfo: item })
   }

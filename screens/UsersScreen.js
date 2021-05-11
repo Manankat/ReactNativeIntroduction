@@ -10,9 +10,8 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import { uniqBy } from "lodash";
-import { getUsers } from "./apis";
-import User from "./User";
-import MainHeader from "../components/MainHeader";
+import { searchGithub } from "./apis";
+import { MainHeader, User } from "../components";
 import { BackgroundColor } from "../constants";
 
 const PAGE_SIZE = 10;
@@ -27,14 +26,15 @@ export function UsersScreen({ navigation }) {
     const hasMoreData = useRef(true);
 
     function userSubmit() {
+        setUsers([]);
         setPage(1)
         fetchData()
     }
 
-    async function fetchData () {
-        if (!hasMoreData.current && users.length > 0) return;
+    async function fetchData() {
+        if (hasMoreData.current && users.length > 0) return;
 
-        const newUsers = await getUsers(query, page, PAGE_SIZE);
+        const newUsers = await searchGithub('users', query, page, PAGE_SIZE);
         if (newUsers.length < PAGE_SIZE) {
             hasMoreData.current = false;
         }
@@ -80,10 +80,10 @@ export function UsersScreen({ navigation }) {
                 />
                 <View style={{ margin: 10 }}>
                     <View>
-                        <TextInput style={oldStyles.textInput} onChangeText={search => setQuery(search)} placeholder="Type Here..." />
+                        <TextInput style={styles.textInput} onChangeText={search => setQuery(search)} placeholder="Type Here..." />
                     </View>
                     <View style={{ marginHorizontal: 100 }}>
-                        <Button style={oldStyles.button} title="Search" color={BackgroundColor} onPress={userSubmit} />
+                        <Button style={styles.button} title="Search" color={BackgroundColor} onPress={userSubmit} />
                     </View>
                 </View>
                 {isLoading ? (
@@ -137,9 +137,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#ed7669",
     },
-});
-
-const oldStyles = StyleSheet.create({
     textInput: {
         alignItems: 'center',
         backgroundColor: '#b3b3b3',

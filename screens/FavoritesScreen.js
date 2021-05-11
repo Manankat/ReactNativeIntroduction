@@ -8,8 +8,7 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import { uniqBy } from "lodash";
-import Repository from "./Repository";
-import MainHeader from "../components/MainHeader";
+import { MainHeader, Repository } from "../components";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PRIMARY_COLOR = "#e74c3c";
@@ -35,7 +34,6 @@ export const FavoritesScreen = ({ navigation, route }) => {
         if (!hasMoreData.current && repositories.length > 0) return;
 
         const newRepositories = await getFavorites()
-        console.log(newRepositories)
 
         setRepositories((repositories) => {
             const allRepositories = repositories.concat(

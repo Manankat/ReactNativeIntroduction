@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 
-export default function MainHeader({ navigation, isMain, title }) {
+export function MainHeader({ navigation, isMain, title }) {
   if (isMain) {
     return (
       <View

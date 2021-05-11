@@ -13,7 +13,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { ScrollView } from 'react-native-gesture-handler';
-import { getRepositories, getFollowers } from "./apis";
+import { fetchObj } from "./apis";
 import Constants from "expo-constants";
 const PRIMARY_COLOR = "#e74c3c";
 
@@ -25,8 +25,8 @@ export const UserScreen = ({ navigation, route }) => {
     const [isLoading, setLoading] = useState(true);
 
     async function fetchData() {
-        const res = await getRepositories(route.params.userInfo.repos_url)
-        const a = await getFollowers(route.params.userInfo.followers_url)
+        const res = await fetchObj(route.params.userInfo.repos_url)
+        const a = await fetchObj(route.params.userInfo.followers_url)
 
         setRepositories(res)
         setFollowers(a)
@@ -82,7 +82,7 @@ export const UserScreen = ({ navigation, route }) => {
             </TouchableHighlight>
         )
     }
-    const keyExtractor = (item) => item.url;
+    const keyExtractor = (item) => item.id;
     const renderDivider = () => <View style={styles.userSeparator}></View>;
     const renderFooter = () => (
         <View style={styles.center}>
@@ -107,12 +107,12 @@ export const UserScreen = ({ navigation, route }) => {
                             {user.login}
                         </Text>
                     </View>
-
                     <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
                         {
                             ["Repositories", "Followers"].map((key) => {
                                 return (
                                     <Button
+                                        key={key}
                                         title={key}
                                         color={key === selected ? "#000EDF" : "#559EDF"}
                                         onPress={() => setSelected(key)}
@@ -121,6 +121,7 @@ export const UserScreen = ({ navigation, route }) => {
                             })
                         }
                     </View>
+
                     {
                         isLoading ? (
                             <ActivityIndicator color={PRIMARY_COLOR} />

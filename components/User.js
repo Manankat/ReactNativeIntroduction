@@ -7,7 +7,8 @@ import {
     TouchableOpacity,
 } from "react-native";
 
-export default function User({ item, navigation }) {
+export function User({ item, navigation }) {
+    console.log(item)
 
     function openUserView() {
         navigation.push('User', { userInfo: item })
@@ -24,7 +25,7 @@ export default function User({ item, navigation }) {
                     </Text>
 
                     <Text style={styles.userPublishedAt}>
-                        Score : {item.score}
+                        Type : {item.type}
                     </Text>
                 </View>
             </View>
