@@ -5,43 +5,25 @@ import {
     View,
     FlatList,
     ActivityIndicator,
+    Text,
 } from "react-native";
 import Constants from "expo-constants";
 import { uniqBy } from "lodash";
 import { MainHeader, Repository } from "../components";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFavorites, removeFavorites } from './localStorage'
+import { BackgroundColor } from "../constants";
 
 const PRIMARY_COLOR = "#e74c3c";
 
 export const FavoritesScreen = ({ navigation, route }) => {
-    const [query, setQuery] = useState('');
     const [isLoading, setLoading] = useState(true);
     const [repositories, setRepositories] = useState([]);
-    const [page, setPage] = useState(1);
     const [refreshing, setRefreshing] = useState(false);
-    const hasMoreData = useRef(true);
 
-
-    async function getFavorites() {
-        try {
-            const jsonValue = await AsyncStorage.getItem('favorites')
-            return jsonValue != null ? JSON.parse(jsonValue) : [];
-        } catch (e) {
-            // error reading value
-        }
-    }
     async function fetchData() {
-        if (!hasMoreData.current && repositories.length > 0) return;
-
         const newRepositories = await getFavorites()
 
-        setRepositories((repositories) => {
-            const allRepositories = repositories.concat(
-                newRepositories.filter((repository) => repository.url)
-            );
-
-            return uniqBy(allRepositories, "url");
-        });
+        setRepositories(newRepositories)
         setLoading(false);
         setRefreshing(false);
     };
@@ -53,17 +35,11 @@ export const FavoritesScreen = ({ navigation, route }) => {
     const refreshData = () => {
         setRefreshing(true);
         setRepositories([]);
-        hasMoreData.current = true;
         fetchData()
     };
 
     const renderRepository = ({ item }) => <Repository item={item} navigation={navigation} />;
     const renderDivider = () => <View style={styles.repositorySeparator}></View>;
-    const renderFooter = () => (
-        <View style={styles.center}>
-            {hasMoreData.current && <ActivityIndicator color={PRIMARY_COLOR} />}
-        </View>
-    );
     const keyExtractor = (item) => item.url;
 
     return (
@@ -79,16 +55,27 @@ export const FavoritesScreen = ({ navigation, route }) => {
                         <ActivityIndicator size="large" color={PRIMARY_COLOR} />
                     </View>
                 ) : (
-                    <FlatList
-                        data={repositories}
-                        renderItem={renderRepository}
-                        keyExtractor={keyExtractor}
-                        showsVerticalScrollIndicator={false}
-                        ItemSeparatorComponent={renderDivider}
-                        ListFooterComponent={renderFooter}
-                        onRefresh={refreshData}
-                        refreshing={refreshing}
-                    />
+                    repositories.length > 0 ? (
+
+                        <FlatList
+                            data={repositories}
+                            renderItem={renderRepository}
+                            keyExtractor={keyExtractor}
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={renderDivider}
+                            onRefresh={refreshData}
+                            refreshing={refreshing}
+                            />
+                    ) : (
+                        <Text style={{
+                            textAlign: "center",
+                            justifyContent: "center",
+                            fontSize: 22,
+                            margin: 20
+                        }}>
+                            No favorites yet
+                        </Text>
+                    )
                 )}
             </View>
         </SafeAreaView>
@@ -117,7 +104,7 @@ const styles = StyleSheet.create({
     },
     repositorySeparator: {
         borderBottomWidth: 1,
-        borderBottomColor: "#ed7669",
+        borderBottomColor: BackgroundColor,
     },
 });
 

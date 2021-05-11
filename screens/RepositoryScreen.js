@@ -85,7 +85,6 @@ import {
     FlatList,
     ActivityIndicator,
     Button,
-    TextInput,
     Image,
     TouchableHighlight,
     TouchableOpacity,
@@ -95,6 +94,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { fetchObj } from "./apis";
 import Constants from "expo-constants";
 import { AntDesign } from '@expo/vector-icons';
+import { getFavorites, addFavorites, removeFavorites, favoriteIsPresent } from './localStorage'
 
 const PRIMARY_COLOR = "#e74c3c";
 const PAGE_SIZE = 20
@@ -106,6 +106,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
     const [selected, setSelected] = useState('Issues');
     const [isLoading, setLoading] = useState(true);
     const [page, setPage] = useState(1)
+    const [present, setPresent] = useState(false)
 
     async function fetchData() {
         const res = await fetchObj(`${route.params.repositoryInfo.url}/issues?page=${page}&per_page=${PAGE_SIZE}`)
@@ -117,6 +118,11 @@ export const RepositoryScreen = ({ navigation, route }) => {
     };
 
     useEffect(() => {
+        async function getFav() {
+            const isPresent = await favoriteIsPresent(route.params.repositoryInfo)
+            setPresent(isPresent)
+        }
+        getFav()
         setRepository(route.params.repositoryInfo);
         fetchData()
     }, [route.params.repositoryInfo])
@@ -134,7 +140,6 @@ export const RepositoryScreen = ({ navigation, route }) => {
     }
 
     useEffect(() => {
-        console.log(page)
         fetchMoreIssues()
     }, [page])
 
@@ -144,6 +149,16 @@ export const RepositoryScreen = ({ navigation, route }) => {
 
     const openUserView = (item) => {
         navigation.push('User', { repositoryInfo: item })
+    }
+
+    function manageFav() {
+        if (present) {
+            removeFavorites(repository)
+        } else {
+            addFavorites(repository)
+        }
+        setPresent(!present)
+
     }
 
     function renderContributors({ item }) {
@@ -171,7 +186,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
                         {item.title}
                     </Text>
                     <Text style={{ flex: 1 / 7, textAlign: "center" }}>
-                        <AntDesign name="exclamationcircle" size={24} color={item.state === "open" ? "green": "red"} />
+                        <AntDesign name="exclamationcircle" size={24} color={item.state === "open" ? "green" : "red"} />
                     </Text>
                 </View>
 
@@ -192,9 +207,18 @@ export const RepositoryScreen = ({ navigation, route }) => {
                     <View style={{
                         margin: 16
                     }}>
-                        <Text style={styles.repositoryTitle} numberOfLines={1}>
-                            {repository.full_name}
-                        </Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <View>
+                                <Text style={styles.repositoryTitle} numberOfLines={1}>
+                                    {repository.full_name}
+                                </Text>
+                            </View>
+                            <View>
+                                <TouchableOpacity onPress={() => manageFav()}>
+                                    <AntDesign name="star" size={32} color={present ? "orange" : "grey"} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                         <Text style={styles.repositoryTitle} numberOfLines={3}>
                             {repository.description}
                         </Text>
@@ -280,7 +304,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
 
                 </ScrollView>
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 };
 

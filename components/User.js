@@ -8,8 +8,6 @@ import {
 } from "react-native";
 
 export function User({ item, navigation }) {
-    console.log(item)
-
     function openUserView() {
         navigation.push('User', { userInfo: item })
     }
