@@ -47,8 +47,6 @@ export const FavoritesScreen = ({ navigation, route }) => {
             <View style={styles.content}>
                 <MainHeader
                     title="Favorites"
-                    isMain={true}
-                    navigation={navigation}
                 />
                 {isLoading ? (
                     <View style={styles.center}>

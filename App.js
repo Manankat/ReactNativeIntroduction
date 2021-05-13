@@ -11,7 +11,6 @@ import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 const UserStack = createStackNavigator();
 const RepositoryStack = createStackNavigator();
 const FavoritesStack = createStackNavigator();
-const IssueStack = createStackNavigator();
 const stackScreenOptions = {
     headerShown: false,
     gestureEnabled: true,
@@ -22,6 +21,8 @@ function UserStackScreen() {
         <UserStack.Navigator screenOptions={stackScreenOptions}>
             <UserStack.Screen name="Users" component={UsersScreen} />
             <UserStack.Screen name="User" component={UserScreen} />
+            <UserStack.Screen name="Repository" component={RepositoryScreen} />
+            <UserStack.Screen name="Issue" component={IssueScreen} />
         </UserStack.Navigator>
     );
 }
@@ -31,6 +32,8 @@ function RepositoryStackScreen() {
         <RepositoryStack.Navigator screenOptions={stackScreenOptions}>
             <RepositoryStack.Screen name="Repositories" component={RepositoriesScreen} />
             <RepositoryStack.Screen name="Repository" component={RepositoryScreen} />
+            <RepositoryStack.Screen name="Issue" component={IssueScreen} />
+            <RepositoryStack.Screen name="User" component={UserScreen} />
         </RepositoryStack.Navigator>
     );
 }
@@ -40,15 +43,9 @@ function FavoritesStackScreen() {
         <FavoritesStack.Navigator screenOptions={stackScreenOptions}>
             <FavoritesStack.Screen name="Favorites" component={FavoritesScreen} />
             <FavoritesStack.Screen name="Repository" component={RepositoryScreen} />
+            <FavoritesStack.Screen name="Issue" component={IssueScreen} />
+            <FavoritesStack.Screen name="User" component={UserScreen} />
         </FavoritesStack.Navigator>
-    );
-}
-
-function IssueStackScreen() {
-    return (
-        <IssueStack.Navigator screenOptions={stackScreenOptions}>
-            <IssueStack.Screen name="Issue" component={IssueScreen} />
-        </IssueStack.Navigator>
     );
 }
 

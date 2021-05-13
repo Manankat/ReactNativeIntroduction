@@ -75,8 +75,6 @@ export function RepositoriesScreen({ navigation }) {
             <View style={styles.content}>
                 <MainHeader
                     title="Repositories"
-                    isMain={true}
-                    navigation={navigation}
                 />
                 <View style={{ margin: 10 }}>
                     <View>

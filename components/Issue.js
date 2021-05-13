@@ -8,7 +8,7 @@ export function Issue({ item, navigation }) {
   }
 
   return (
-      <TouchableOpacity onPress={() => openUserView()}>
+      <TouchableOpacity onPress={() => openIssueView()}>
           <View style={styles.issue}>
               <View style={{ flex: 1 }}>
                   <Text style={styles.issueNumber} numberOfLines={1}>

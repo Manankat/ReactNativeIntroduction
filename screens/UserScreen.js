@@ -7,12 +7,9 @@ import {
     FlatList,
     ActivityIndicator,
     Button,
-    TextInput,
     Image,
-    TouchableHighlight,
     TouchableOpacity,
 } from "react-native";
-import { ScrollView } from 'react-native-gesture-handler';
 import { fetchObj } from "./apis";
 import Constants from "expo-constants";
 const PRIMARY_COLOR = "#e74c3c";
@@ -40,7 +37,7 @@ export const UserScreen = ({ navigation, route }) => {
     }, [route.params.userInfo])
 
     const openRepoView = (item) => {
-        navigation.push('Repository', { repoInfo: item })
+        navigation.push('Repository', { repositoryInfo: item })
     }
 
     const openUserView = (item) => {
@@ -63,9 +60,9 @@ export const UserScreen = ({ navigation, route }) => {
 
     function renderRepository({ item }) {
         return (
-            <TouchableHighlight onPress={() => openRepoView(item)} style={{ marginHorizontal: 10, marginVertical: 5 }}>
+            <TouchableOpacity onPress={() => openRepoView(item)} style={{ marginHorizontal: 10, marginVertical: 5 }}>
                 <View style={styles.repositoyContainer}>
-                    <Text style={{ flex: 4 / 7 }}>
+                    <Text style={{ flex: 3 / 7 }}>
                         {item.name}
                     </Text>
                     <Text style={{ flex: 1 / 7, textAlign: "center" }}>
@@ -74,12 +71,12 @@ export const UserScreen = ({ navigation, route }) => {
                     <Text style={{ flex: 1 / 7, textAlign: "center" }}>
                         {item.open_issues_count}
                     </Text>
-                    <Text style={{ flex: 1 / 7, textAlign: "center" }}>
+                    <Text style={{ flex: 2 / 7, textAlign: "center" }}>
                         {item.watchers_count}
                     </Text>
 
                 </View>
-            </TouchableHighlight>
+            </TouchableOpacity>
         )
     }
     const keyExtractor = (item) => item.id;
@@ -92,42 +89,60 @@ export const UserScreen = ({ navigation, route }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <ScrollView>
-                    <View style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        margin: 16
-                    }}>
-                        <Image
-                            style={styles.avatar}
-                            source={{ uri: user.avatar_url }}
-                        />
-                        <Text style={styles.name}>
-                            {user.login}
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
-                        {
-                            ["Repositories", "Followers"].map((key) => {
-                                return (
-                                    <Button
-                                        key={key}
-                                        title={key}
-                                        color={key === selected ? "#000EDF" : "#559EDF"}
-                                        onPress={() => setSelected(key)}
-                                    />
-                                )
-                            })
-                        }
-                    </View>
-
+                <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    margin: 16
+                }}>
+                    <Image
+                        style={styles.avatar}
+                        source={{ uri: user.avatar_url }}
+                    />
+                    <Text style={styles.name}>
+                        {user.login}
+                    </Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
                     {
-                        isLoading ? (
-                            <ActivityIndicator color={PRIMARY_COLOR} />
-                        ) : (
-                            selected === "Repositories" ? (
-                                repositories.length > 0 ? (
+                        ["Repositories", "Followers"].map((key) => {
+                            return (
+                                <Button
+                                    key={key}
+                                    title={key}
+                                    color={key === selected ? "#000EDF" : "#559EDF"}
+                                    onPress={() => setSelected(key)}
+                                />
+                            )
+                        })
+                    }
+                </View>
+
+                {
+                    isLoading ? (
+                        <ActivityIndicator color={PRIMARY_COLOR} />
+                    ) : (
+                        selected === "Repositories" ? (
+                            repositories.length > 0 ? (
+                                <>
+                                    <View style={{ marginHorizontal: 10, marginVertical: 5 }}>
+                                        <View style={styles.repositoyContainer}>
+                                            <Text style={{ flex: 3 / 7 }}>
+                                                Name
+                                                </Text>
+                                            <Text style={{ flex: 1 / 7, textAlign: "center" }}>
+                                                Forks
+                                                </Text>
+                                            <Text style={{ flex: 1 / 7, textAlign: "center" }}>
+                                                Open Issues
+                                                </Text>
+                                            <Text style={{ flex: 2 / 7, textAlign: "center" }}>
+                                                Watchers
+                                                </Text>
+
+                                        </View>
+                                    </View>
+
                                     <FlatList
                                         data={repositories}
                                         renderItem={renderRepository}
@@ -135,40 +150,39 @@ export const UserScreen = ({ navigation, route }) => {
                                         ItemSeparatorComponent={renderDivider}
                                         ListFooterComponent={renderFooter}
                                     />
-                                ) : (
-                                    <Text style={{
-                                        textAlign: "center",
-                                        justifyContent: "center",
-                                        fontSize: 22,
-                                        margin: 20
-                                    }}>
-                                        No public repositories founded
-                                    </Text>
-                                )
+                                </>
                             ) : (
-                                followers.length > 0 ? (
-                                    <FlatList
-                                        data={followers}
-                                        renderItem={renderUser}
-                                        keyExtractor={keyExtractor}
-                                        ItemSeparatorComponent={renderDivider}
-                                        ListFooterComponent={renderFooter}
-                                    />
-                                ) : (
-                                    <Text style={{
-                                        textAlign: "center",
-                                        justifyContent: "center",
-                                        fontSize: 22,
-                                        margin: 20
-                                    }}>
-                                        No followers founded
-                                    </Text>
-                                )
+                                <Text style={{
+                                    textAlign: "center",
+                                    justifyContent: "center",
+                                    fontSize: 22,
+                                    margin: 20
+                                }}>
+                                    No public repositories founded
+                                </Text>
+                            )
+                        ) : (
+                            followers.length > 0 ? (
+                                <FlatList
+                                    data={followers}
+                                    renderItem={renderUser}
+                                    keyExtractor={keyExtractor}
+                                    ItemSeparatorComponent={renderDivider}
+                                    ListFooterComponent={renderFooter}
+                                />
+                            ) : (
+                                <Text style={{
+                                    textAlign: "center",
+                                    justifyContent: "center",
+                                    fontSize: 22,
+                                    margin: 20
+                                }}>
+                                    No followers founded
+                                </Text>
                             )
                         )
-                    }
-
-                </ScrollView>
+                    )
+                }
             </View>
         </SafeAreaView>
     )

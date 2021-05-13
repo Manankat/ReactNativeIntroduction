@@ -1,66 +1,60 @@
-import React, {useState, useEffect} from "react";
-import { StyleSheet, Text, TextInput, View, ScrollView, FlatList, TouchableHighlight} from "react-native";
-import { Button } from 'react-native-elements';
+import React from "react";
+import {
+    StyleSheet,
+    SafeAreaView,
+    View,
+    Text,
+    ScrollView
+} from "react-native";
+import Constants from "expo-constants";
+import { AntDesign } from '@expo/vector-icons';
+import { User } from "../components";
 
 export const IssueScreen = ({ navigation, route }) => {
-    const [repository, setRepository] = useState('');
-    const [issues, setIssues] = useState([]);
-    const [issue, setIssue] = useState('');
-    const [error, setError] = useState('');
-
-    const setData = ({
-        repository
-    }) => {
-        setRepository(repository);
-    }
-
-    //maybe something missing there
-
-    const openIssueView = (item) => {
-        navigation.navigate('Issue', { issueInfo: item })
-    }
-
-    const fetchIssues = () => {
-      fetch(`https://api.github.com/`)
-    }
-
-    function renderIssue({ item }) {
-        return (
-            <TouchableHighlight onPress={() => openIssueView(item)} style={{ marginHorizontal: 10, marginVertical: 5 }}>
-                <View style={styles.repositoyContainer}>
-                    <Text style={{ flex: 4 / 7 }}>
-                        {item.number}
-                    </Text>
-                    <Text style={{ flex: 1 / 7, textAlign: "center" }}>
-                        {item.title}
-                    </Text>
-                    <Text style={{ flex: 1 / 7, textAlign: "center" }}>
-                        {item.repository_url}
-                    </Text>
-                    <Text style={{ flex: 1 / 7, textAlign: "center" }}>
-                        {item.labels_url}
-                    </Text>
-
-                </View>
-            </TouchableHighlight>
-        )
-    }
-    const keyExtractor = (item) => item.url;
-    const renderDivider = () => <View style={styles.userSeparator}></View>;
+    const {
+        issueInfo
+    } = route.params
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
                 <ScrollView>
                     <View style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
                         margin: 16
                     }}>
-                        <Text style={styles.name}>
-                            {issue.number}
-                        </Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <View style={{ flex: 6 / 7 }}>
+                                <Text style={styles.issueTitle} numberOfLines={2}>
+                                    {issueInfo.title}
+                                </Text>
+                            </View>
+                            <AntDesign name="exclamationcircle" size={24} color={issueInfo.state === "open" ? "green" : "red"} />
+                        </View>
+                        {
+                            issueInfo.labels.map((item, index) => {
+                                return (
+                                    <View key={index} style={{ marginVertical: 5 }} >
+                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                            <View style={{ marginRight: 5 }}>
+                                                <AntDesign name="tag" size={24} color={`#${item.color}`} />
+                                            </View>
+                                            <Text>
+                                                {item.name}
+                                            </Text>
+                                        </View>
+                                        <Text>
+                                            {item.description}
+                                        </Text>
+                                    </View>
+                                )
+                            })
+                        }
+                        <User item={issueInfo.user} navigation={navigation} />
+                        <View>
+                            <Text style={styles.issueDescription}>
+                                {issueInfo.body}
+                            </Text>
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -71,24 +65,22 @@ export const IssueScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: Constants.statusBarHeight,
     },
     content: {
         flex: 1,
         paddingVertical: 15,
     },
-    repositoyContainer: {
-        marginBottom: 5,
-        backgroundColor: "#d6d6d6",
-        height: 40,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center"
+    issueTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
     },
-    name: {
-        marginTop: 20,
-        alignContent: "center",
-        fontSize: 30,
-        flex: 3 / 7,
-        textAlign: "center"
+    issueDescription: {
+        fontSize: 16,
+        marginBottom: 10,
+    },
+    issuePublishedAt: {
+        fontSize: 14,
     },
 });

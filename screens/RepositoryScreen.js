@@ -1,81 +1,3 @@
-/*
-import React, { useState, useEffect } from "react";
-import 'react-native-gesture-handler';
-import { StyleSheet, Text, View, FlatList, TouchableHighlight } from "react-native";
-import { Issue } from "../components";
-import { fetchObj } from "./apis";
-
-export const RepositoryScreen = ({ navigation, route }) => {
-    const [repositories, setIssues] = useState([]);
-    const [issues, setIssues] = useState([]);
-    const [contributors, setContributors] = useState('');
-    // const [repository, setRepository] = useState('');
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        setContributors(fetchObj(route.params.repositoryInfo.contributors_url))
-    }, [])
-
-    useEffect(() => {
-        setIssues(fetchObj(route.params.issueInfo))
-    }, [route.params.issueInfo])
-
-    const openUserView = (index) => {
-        navigation.navigate('User', { repositoryInfo: contributors[index] })
-    }
-
-    const openIssueView = (index) => {
-        navigation.navigate('Issue', { issueInfo: issues[index] })
-    }
-
-    return (
-        <>
-            <View style={styles.container}>
-                <View style={styles.itemView}>
-
-                    <Text style={styles.repo}>Issue Number</Text>
-                    <Text style={styles.repo}>{route.params.repositoryInfo.full_name}</Text>
-                    <Text style={styles.repo}>All issues</Text>
-                    {
-                        contributors.length > 0 && (
-                            <FlatList
-                                data={contributors}
-                                onEndReachedThreshold={0.8}
-                                keyExtractor={(index) => index.toString()}
-                                renderItem={({ item, index }) => (
-                                    <TouchableHighlight style={styles.item} key={index} onPress={() => openUserView(index)}>
-                                        <View key={index} style={styles.block_repo}>
-                                            <View style={styles.block_content}><Text>{item.login}</Text></View>
-                                        </View>
-                                    </TouchableHighlight>
-                                )}
-                            />
-                        )
-                    }
-                    {
-                        issues.length > 0 && (
-                            <FlatList
-                                data={issues}
-                                onEndReachedThreshold={0.8}
-                                keyExtractor={(index) => index.toString()}
-                                renderItem={({ item, index }) => {
-                                    <TouchableHighlight style={styles.item} key={index}>
-                                        <View key={index} style={styles.block_repo}>
-                                            <View style={styles.block_content}><Text>{item.number}</Text></View>
-                                        </View>
-                                    </TouchableHighlight>
-                                }}
-                            />
-                        )
-                    }
-                </View>
-            </View>
-        </>
-    )
-};
-
-*/
-
 import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
@@ -86,15 +8,13 @@ import {
     ActivityIndicator,
     Button,
     Image,
-    TouchableHighlight,
     TouchableOpacity,
 } from "react-native";
 import { uniqBy } from "lodash";
-import { ScrollView } from 'react-native-gesture-handler';
 import { fetchObj } from "./apis";
 import Constants from "expo-constants";
-import { AntDesign } from '@expo/vector-icons';
-import { getFavorites, addFavorites, removeFavorites, favoriteIsPresent } from './localStorage'
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { addFavorites, removeFavorites, favoriteIsPresent } from './localStorage'
 
 const PRIMARY_COLOR = "#e74c3c";
 const PAGE_SIZE = 20
@@ -148,7 +68,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
     }
 
     const openUserView = (item) => {
-        navigation.push('User', { repositoryInfo: item })
+        navigation.push('User', { userInfo: item })
     }
 
     function manageFav() {
@@ -177,7 +97,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
 
     function renderIssues({ item }) {
         return (
-            <TouchableHighlight onPress={() => openIssueView(item)} style={{ marginHorizontal: 10, marginVertical: 5 }}>
+            <TouchableOpacity onPress={() => openIssueView(item)} style={{ marginHorizontal: 10, marginVertical: 5 }}>
                 <View style={styles.issueContainer}>
                     <Text style={{ flex: 1 / 7, textAlign: "center" }}>
                         {item.number}
@@ -189,8 +109,7 @@ export const RepositoryScreen = ({ navigation, route }) => {
                         <AntDesign name="exclamationcircle" size={24} color={item.state === "open" ? "green" : "red"} />
                     </Text>
                 </View>
-
-            </TouchableHighlight>
+            </TouchableOpacity>
         )
     }
     const keyExtractor = (item) => item.id;
@@ -203,106 +122,126 @@ export const RepositoryScreen = ({ navigation, route }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <ScrollView>
-                    <View style={{
-                        margin: 16
-                    }}>
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <View>
-                                <Text style={styles.repositoryTitle} numberOfLines={1}>
-                                    {repository.full_name}
-                                </Text>
-                            </View>
-                            <View>
-                                <TouchableOpacity onPress={() => manageFav()}>
-                                    <AntDesign name="star" size={32} color={present ? "orange" : "grey"} />
-                                </TouchableOpacity>
-                            </View>
+                <View style={{
+                    margin: 16
+                }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <View>
+                            <Text style={styles.repositoryTitle} numberOfLines={1}>
+                                {repository.full_name}
+                            </Text>
                         </View>
-                        <Text style={styles.repositoryTitle} numberOfLines={3}>
-                            {repository.description}
-                        </Text>
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <Text style={styles.repositoryPublishedAt}>
-                                Open issues : {repository.open_issues_count}
-                            </Text>
-                            <Text style={styles.repositoryPublishedAt}>
-                                Forks : {repository.forks_count}
-                            </Text>
-                            <Text style={styles.repositoryPublishedAt}>
-                                Watchers : {repository.watchers_count}
-                            </Text>
+                        <View>
+                            <TouchableOpacity onPress={() => manageFav()}>
+                                <AntDesign name="star" size={32} color={present ? "orange" : "grey"} />
+                            </TouchableOpacity>
                         </View>
                     </View>
+                    <Text style={styles.repositoryTitle} numberOfLines={3}>
+                        {repository.description}
+                    </Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <Text style={styles.repositoryPublishedAt}>
+                            Open issues : {repository.open_issues_count}
+                        </Text>
+                        <Text style={styles.repositoryPublishedAt}>
+                            Forks : {repository.forks_count}
+                        </Text>
+                        <Text style={styles.repositoryPublishedAt}>
+                            Watchers : {repository.watchers_count}
+                        </Text>
+                    </View>
 
-                    <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <Text style={styles.repositoryPublishedAt}>
+                            Size : {repository.size}
+                        </Text>
+                        <Text style={styles.repositoryPublishedAt}>
+                            Default branch : {repository.default_branch}
+                        </Text>
+                    </View>
+
+                    <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
                         {
-                            ["Issues", "Contributors"].map((key) => {
-                                return (
-                                    <Button
-                                        key={key}
-                                        title={key}
-                                        color={key === selected ? "#000EDF" : "#559EDF"}
-                                        onPress={() => setSelected(key)}
-                                    />
-                                )
-                            })
+                            repository.fork && (
+                                <AntDesign name="fork" size={24} color="red" />
+                            )
+                        }
+                        {
+                            repository.private && (
+                                <FontAwesome name="user-secret" size={24} color="black" />
+                            )
                         }
                     </View>
+                </View>
 
+                <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
                     {
-                        isLoading ? (
-                            <ActivityIndicator color={PRIMARY_COLOR} />
-                        ) : (
-                            selected === "Issues" ? (
-                                issues.length > 0 ? (
-                                    <FlatList
-                                        data={issues}
-                                        renderItem={renderIssues}
-                                        keyExtractor={keyExtractor}
-                                        ItemSeparatorComponent={renderDivider}
-                                        ListFooterComponent={renderFooter}
-                                        initialNumToRender={PAGE_SIZE * page}
-                                        onEndReached={() => {
-                                            setPage((page) => page + 1);
-                                        }
-                                        }
-                                        onEndReachedThreshold={1}
-                                    />
-                                ) : (
-                                    <Text style={{
-                                        textAlign: "center",
-                                        justifyContent: "center",
-                                        fontSize: 22,
-                                        margin: 20
-                                    }}>
-                                        No public issues founded
-                                    </Text>
-                                )
+                        ["Issues", "Contributors"].map((key) => {
+                            return (
+                                <Button
+                                    key={key}
+                                    title={key}
+                                    color={key === selected ? "#000EDF" : "#559EDF"}
+                                    onPress={() => setSelected(key)}
+                                />
+                            )
+                        })
+                    }
+                </View>
+
+                {
+                    isLoading ? (
+                        <ActivityIndicator color={PRIMARY_COLOR} />
+                    ) : (
+                        selected === "Issues" ? (
+                            issues.length > 0 ? (
+                                <FlatList
+                                    data={issues}
+                                    renderItem={renderIssues}
+                                    keyExtractor={keyExtractor}
+                                    ItemSeparatorComponent={renderDivider}
+                                    ListFooterComponent={renderFooter}
+                                    initialNumToRender={PAGE_SIZE * page}
+                                    onEndReached={() => {
+                                        setPage((page) => page + 1);
+                                    }
+                                    }
+                                    onEndReachedThreshold={1}
+                                />
                             ) : (
-                                contributors.length > 0 ? (
-                                    <FlatList
-                                        data={contributors}
-                                        renderItem={renderContributors}
-                                        keyExtractor={keyExtractor}
-                                        ItemSeparatorComponent={renderDivider}
-                                        ListFooterComponent={renderFooter}
-                                    />
-                                ) : (
-                                    <Text style={{
-                                        textAlign: "center",
-                                        justifyContent: "center",
-                                        fontSize: 22,
-                                        margin: 20
-                                    }}>
-                                        No contributors founded
-                                    </Text>
-                                )
+                                <Text style={{
+                                    textAlign: "center",
+                                    justifyContent: "center",
+                                    fontSize: 22,
+                                    margin: 20
+                                }}>
+                                    No public issues founded
+                                </Text>
+                            )
+                        ) : (
+                            contributors.length > 0 ? (
+                                <FlatList
+                                    data={contributors}
+                                    renderItem={renderContributors}
+                                    keyExtractor={keyExtractor}
+                                    ItemSeparatorComponent={renderDivider}
+                                    ListFooterComponent={renderFooter}
+                                />
+                            ) : (
+                                <Text style={{
+                                    textAlign: "center",
+                                    justifyContent: "center",
+                                    fontSize: 22,
+                                    margin: 20
+                                }}>
+                                    No contributors founded
+                                </Text>
                             )
                         )
-                    }
+                    )
+                }
 
-                </ScrollView>
             </View>
         </SafeAreaView >
     )
@@ -319,6 +258,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
     },
     issueContainer: {
+        paddingVertical: 7,
         marginBottom: 5,
         backgroundColor: "#d6d6d6",
         flexDirection: "row",

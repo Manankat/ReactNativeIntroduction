@@ -75,8 +75,6 @@ export function UsersScreen({ navigation }) {
             <View style={styles.content}>
                 <MainHeader
                     title="Users"
-                    isMain={true}
-                    navigation={navigation}
                 />
                 <View style={{ margin: 10 }}>
                     <View>
